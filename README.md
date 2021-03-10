@@ -1,7 +1,6 @@
 # HRCNet: High-Resolution Context Extraction Network for Semantic Segmentation of Remote Sensing Images
 This repository is a PyTorch implementation for our [Remote Sensing paper](https://www.mdpi.com/2072-4292/13/1/71).  
-![HRCNet Framework](hrcnet.png)
-
+<img src="hrcnet.png" width="800" height="400" alt="HRCNet Framework"/><br/>
 ## Usage  
 ### Version
 pytorch >=1.1, we advise torch1.6.  
