@@ -13,7 +13,7 @@ import time
 import sklearn.metrics as metric
 from loss import SE_loss, Edge_loss
 import logging
-logging.basicConfig(filename='hrnet_v11.log', level=logging.INFO)
+logging.basicConfig(filename='hrnet_train.log', level=logging.INFO)
 
 # 0=impervious surfacescd
 # 1=building
@@ -278,17 +278,17 @@ def train():
     # PoseHighResolutionNet.load_state_dict(torch.load('model/hrnetv2_w48_imagenet_pretrained.pth'))
 
     start = time.clock()
-    end_epoch = 600
+    end_epoch = 400
     lr = args.learning_rate
     miou = [0]
     best_miou = 0.1
-    last_epoch = 400
+    last_epoch = 0
     test_epoch = end_epoch - 50
     ave_loss = AverageMeter()
     world_size = get_world_size()
     reduced_loss = [0]
 
-    model_state_file = "model/checkpoint_hrnet32_cut_384_72.pkl.tar"
+    model_state_file = "model/checkpoint_hrnet.pkl.tar"
     if os.path.isfile(model_state_file):
         logging.info("=> loading checkpoint '{}'".format(model_state_file))
         checkpoint = torch.load(model_state_file, map_location=lambda storage, loc: storage)
@@ -303,7 +303,7 @@ def train():
         if distributed:
             train_sampler.set_epoch(epoch)
         PoseHighResolutionNet.train()
-        setproctitle.setproctitle("xzy:" + str(epoch) + "/" + "{}".format(end_epoch))
+        setproctitle.setproctitle("Training:" + str(epoch) + "/" + "{}".format(end_epoch))
         for i, sample in enumerate(dataloader_train):
             images, labels, edge = sample['image'], sample['label'], sample['edge']
             images, labels, edge = images.to(device), labels.to(device), edge.to(device)
@@ -344,20 +344,20 @@ def train():
 
             if epoch % 100 == 0 and epoch != 0:
                 torch.save(PoseHighResolutionNet.state_dict(),
-                           'model/edge1_se_origin_hrnet48_3463__cut_acfpn3463_384_72_sem_gcnet_stage4_xzy_{0}_{1}.pkl'.format(epoch, args.learning_rate))
+                           'model/checkpoint_hrnet_{0}_{1}.pkl'.format(epoch, args.learning_rate))
 
             if miou[0] >= best_miou:
                 best_miou = miou[0]
                 torch.save(PoseHighResolutionNet.state_dict(),
-                           'model/edge1_se_hrnet48_3463_cut_acfpn3463_384_72_sem_gcnet_stage4_best_result_{}.pkl'.format(epoch))
+                           'model/checkpoint_hrnet_best_result_{}.pkl'.format(epoch))
             torch.save({
                 'epoch': epoch + 1,
                 'best_mIoU': best_miou,
                 'state_dict': PoseHighResolutionNet.state_dict(),
                 'optimizer': optimizer.state_dict(),
-            }, 'model/edge1_se_checkpoint_hrnet48_3463_cut_acfpn3463_384_72_sem_gcnet_stage4.pkl.tar')  # checkpoint_hrnet32_cut_384_72.pkl.tar'
+            }, 'model/checkpoint_hrnet.pkl.tar')
     torch.save(PoseHighResolutionNet.state_dict(),
-                   'model/edge1_se_origin_hrnet48_3463_cut_acfpn3463_384_72_sem_gcnet_stage4_xzy_{0}_{1}.pkl'.format(end_epoch, args.learning_rate))
+                   'model/checkpoint_hrnet_{0}_{1}.pkl'.format(end_epoch, args.learning_rate))
 
 
 def adjust_learning_rate(optimizer, base_lr, max_iters,
