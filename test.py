@@ -10,7 +10,7 @@ from loss import Edge_loss
 import time
 from scipy import io
 import logging
-logging.basicConfig(filename='hrnet_v11.log', level=logging.INFO)
+logging.basicConfig(filename='hrnet_test.log', level=logging.INFO)
 
 # 0=impervious surfacescd
 # 1=building
@@ -185,7 +185,7 @@ optimizer = torch.optim.SGD([{'params':
 def test():
     PoseHighResolutionNet.eval()
     with torch.no_grad():
-        model_state_file = "model/edge1_se_hrnet48_3463_cut_acfpn3463_384_72_sem_gcnet_stage4_best_result_397.pkl"
+        model_state_file = "model/checkpoint_hrnet_best_result_397.pkl"
         if os.path.isfile(model_state_file):
             logging.info("=> loading checkpoint '{}'".format(model_state_file))
             checkpoint = torch.load(model_state_file, map_location=lambda storage, loc: storage)
